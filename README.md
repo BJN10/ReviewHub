@@ -33,7 +33,7 @@ ReviewHub is a personal book review website hosted on a manually configured Ubun
 
 ## 📹 Video Link
 
-[Video Explainer Here](https://your-youtube-link.com)
+[Video Explainer Here]((https://youtu.be/piE0l5LBDTQ))
 
 ---
 
