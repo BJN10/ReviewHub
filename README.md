@@ -40,7 +40,7 @@ ReviewHub is a personal book review website hosted on a manually configured Ubun
 ## 🌍 Domain & IP
 
 - Domain: https://bijayan.site  
-- IP Address: 134.199.160.1
+- IP Address: 170.64.255.51
 
 ---
 
