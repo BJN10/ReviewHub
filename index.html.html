@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReviewHub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 50%, #000000 100%);
+            color: white;
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Navigation */
+        nav {
+            background: rgba(0, 0, 0, 0.9);
+            backdrop-filter: blur(10px);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        nav.scrolled {
+            background: rgba(0, 0, 0, 0.95);
+            box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 5px rgba(255, 107, 107, 0.5)); }
+            to { filter: drop-shadow(0 0 20px rgba(78, 205, 196, 0.8)); }
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: #4ecdc4;
+            transform: translateY(-2px);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        /* Hero Section */
+        .hero {
+            margin-top: 80px;
+            padding: 4rem 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 30% 50%, rgba(255, 107, 107, 0.1) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 50%, rgba(78, 205, 196, 0.1) 0%, transparent 50%);
+            animation: pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: slideInUp 1s ease-out;
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            animation: slideInUp 1s ease-out 0.2s both;
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Search Bar */
+        .search-container {
+            margin: 3rem 0;
+            display: flex;
+            justify-content: center;
+            animation: slideInUp 1s ease-out 0.4s both;
+        }
+
+        .search-box {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1rem 3rem 1rem 1.5rem;
+            font-size: 1.1rem;
+            border: 2px solid transparent;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #4ecdc4;
+            transform: scale(1.02);
+            box-shadow: 0 0 30px rgba(78, 205, 196, 0.3);
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .search-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-btn:hover {
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+        }
+
+        /* Popular Reviews Section */
+        .popular-section {
+            padding: 4rem 0;
+            animation: fadeIn 1s ease-out 0.6s both;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .review-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .review-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .review-card:hover::before {
+            left: 100%;
+        }
+
+        .review-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(78, 205, 196, 0.3);
+        }
+
+        .review-card h3 {
+            color: #4ecdc4;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .review-rating {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stars {
+            color: #ffd700;
+            margin-right: 0.5rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+            padding: 2rem;
+            border-radius: 20px;
+            max-width: 600px;
+            width: 90%;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from { transform: translate(-50%, -50%) scale(0.8); }
+            to { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #ff6b6b;
+            transition: all 0.3s ease;
+        }
+
+        .close:hover {
+            transform: scale(1.2);
+            color: #ff4757;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 2rem 0;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: #4ecdc4;
+            transform: translateY(-2px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .reviews-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Floating particles */
+        .particle {
+            position: absolute;
+            background: rgba(78, 205, 196, 0.3);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+    </style>
+</head>
+<body>
+    <nav id="navbar">
+        <div class="nav-container">
+            <div class="logo">ReviewHub</div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#popular">Popular</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#submit">Submit</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main>
+        <section class="hero" id="home">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>ReviewHub</h1>
+                    <p>Discover and share amazing book reviews with our community</p>
+                    
+                    <div class="search-container">
+                        <div class="search-box">
+                            <input type="text" class="search-input" placeholder="Search for books, reviews, or tags..." id="searchInput">
+                            <button class="search-btn" onclick="performSearch()">🔍</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="popular-section" id="popular">
+            <div class="container">
+                <h2 class="section-title">Popular Book Reviews</h2>
+                <div class="reviews-grid" id="reviewsGrid">
+                    <!-- Reviews will be populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal for detailed review -->
+    <div class="modal" id="reviewModal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modalContent">
+                <!-- Modal content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-links" id="about">
+                <a href="#about">About Us</a>
+                <a href="#submit">Submit Review</a>
+                <a href="#contact">Contact</a>
+                <a href="#privacy">Privacy</a>
+            </div>
+            <div style="margin: 1.5rem 0; padding: 1rem; background: rgba(255, 255, 255, 0.05); border-radius: 10px; font-size: 0.9rem; line-height: 1.6;">
+                <h4 style="color: #4ecdc4; margin-bottom: 1rem;">Project Information</h4>
+                <p><strong>Student Number:</strong> 3542024</p>
+                <p style="margin: 0.5rem 0;"><strong>Project:</strong> ReviewHub - A detailed review of all your favorite books!</p>
+                <p style="margin: 0.5rem 0;"><strong>GitHub Repository:</strong> <a href="https://github.com/BJN10/ReviewHub" style="color: #4ecdc4; text-decoration: none;" target="_blank">github.com/BJN10/ReviewHub</a></p>
+                <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                    <p style="margin-bottom: 0.5rem;"><strong>Licensing:</strong></p>
+                    <p>Website code licensed under <a href="https://opensource.org/licenses/MIT" style="color: #4ecdc4; text-decoration: none;" target="_blank">MIT License</a></p>
+                    <p>Book reviews and written content licensed under <a href="https://creativecommons.org/licenses/by/4.0/" style="color: #4ecdc4; text-decoration: none;" target="_blank">CC BY 4.0</a></p>
+                </div>
+            </div>
+            <p>&copy; 2025 ReviewHub. Discover your next favorite book.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Sample data for reviews
+        const reviewsData = [
+            {
+                title: "The Midnight Library",
+                author: "Matt Haig",
+                rating: 5,
+                review: "A beautiful exploration of life's possibilities and regrets. Haig masterfully weaves philosophy with storytelling.",
+                tags: ["Philosophy", "Fiction", "Self-Help"],
+                reviewer: "BookLover23"
+            },
+            {
+                title: "Dune",
+                author: "Frank Herbert",
+                rating: 4,
+                review: "Epic science fiction that defined a genre. Complex world-building and political intrigue make this a must-read.",
+                tags: ["Sci-Fi", "Epic", "Classic"],
+                reviewer: "SciFiReader"
+            },
+            {
+                title: "Educated",
+                author: "Tara Westover",
+                rating: 5,
+                review: "A powerful memoir about education, family, and self-discovery. Westover's journey is both heartbreaking and inspiring.",
+                tags: ["Memoir", "Education", "Biography"],
+                reviewer: "MemoryKeeper"
+            },
+            {
+                title: "The Seven Husbands of Evelyn Hugo",
+                author: "Taylor Jenkins Reid",
+                rating: 5,
+                review: "Captivating story of a Hollywood icon's secrets. Reid creates complex characters you can't help but root for.",
+                tags: ["Romance", "Hollywood", "LGBTQ+"],
+                reviewer: "RomanceReader"
+            },
+            {
+                title: "Atomic Habits",
+                author: "James Clear",
+                rating: 4,
+                review: "Practical guide to building good habits and breaking bad ones. Clear's approach is both scientific and actionable.",
+                tags: ["Self-Help", "Productivity", "Psychology"],
+                reviewer: "HabitBuilder"
+            },
+            {
+                title: "The Song of Achilles",
+                author: "Madeline Miller",
+                rating: 5,
+                review: "A stunning retelling of Greek mythology. Miller's prose is lyrical and the love story is beautifully crafted.",
+                tags: ["Mythology", "Romance", "Historical"],
+                reviewer: "MythologyFan"
+            }
+        ];
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            populateReviews();
+            createFloatingParticles();
+            
+            // Navbar scroll effect
+            window.addEventListener('scroll', function() {
+                const navbar = document.getElementById('navbar');
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+        });
+
+        // Populate reviews
+        function populateReviews() {
+            const grid = document.getElementById('reviewsGrid');
+            grid.innerHTML = '';
+
+            reviewsData.forEach((review, index) => {
+                const card = createReviewCard(review, index);
+                grid.appendChild(card);
+            });
+        }
+
+        // Create review card
+        function createReviewCard(review, index) {
+            const card = document.createElement('div');
+            card.className = 'review-card';
+            card.style.animationDelay = `${index * 0.1}s`;
+            
+            const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+            const tags = review.tags.map(tag => `<span style="background: rgba(78, 205, 196, 0.2); padding: 0.3rem 0.8rem; border-radius: 15px; font-size: 0.8rem; margin-right: 0.5rem;">${tag}</span>`).join('');
+
+            card.innerHTML = `
+                <h3>${review.title}</h3>
+                <p style="color: #ccc; margin-bottom: 1rem;">by ${review.author}</p>
+                <div class="review-rating">
+                    <span class="stars">${stars}</span>
+                    <span>${review.rating}/5</span>
+                </div>
+                <p style="margin-bottom: 1rem; line-height: 1.6;">${review.review.length > 100 ? review.review.substring(0, 100) + '...' : review.review}</p>
+                <div style="margin-bottom: 1rem;">${tags}</div>
+                <p style="color: #4ecdc4; font-size: 0.9rem;">Reviewed by ${review.reviewer}</p>
+            `;
+
+            card.addEventListener('click', () => openModal(review));
+            return card;
+        }
+
+        // Search functionality
+        function performSearch() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const grid = document.getElementById('reviewsGrid');
+            
+            if (!searchTerm) {
+                populateReviews();
+                return;
+            }
+
+            const filteredReviews = reviewsData.filter(review => 
+                review.title.toLowerCase().includes(searchTerm) ||
+                review.author.toLowerCase().includes(searchTerm) ||
+                review.tags.some(tag => tag.toLowerCase().includes(searchTerm)) ||
+                review.review.toLowerCase().includes(searchTerm)
+            );
+
+            grid.innerHTML = '';
+            
+            if (filteredReviews.length === 0) {
+                grid.innerHTML = '<p style="text-align: center; grid-column: 1 / -1; font-size: 1.2rem; color: #ccc;">No reviews found matching your search.</p>';
+                return;
+            }
+
+            filteredReviews.forEach((review, index) => {
+                const card = createReviewCard(review, index);
+                grid.appendChild(card);
+            });
+        }
+
+        // Search on Enter key
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        // Modal functions
+        function openModal(review) {
+            const modal = document.getElementById('reviewModal');
+            const modalContent = document.getElementById('modalContent');
+            
+            const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+            const tags = review.tags.map(tag => `<span style="background: rgba(78, 205, 196, 0.2); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.9rem; margin-right: 0.5rem; margin-bottom: 0.5rem; display: inline-block;">${tag}</span>`).join('');
+
+            modalContent.innerHTML = `
+                <h2 style="color: #4ecdc4; margin-bottom: 1rem;">${review.title}</h2>
+                <p style="color: #ccc; margin-bottom: 1rem; font-size: 1.1rem;">by ${review.author}</p>
+                <div style="display: flex; align-items: center; margin-bottom: 1.5rem;">
+                    <span style="color: #ffd700; font-size: 1.2rem; margin-right: 0.5rem;">${stars}</span>
+                    <span style="font-size: 1.1rem;">${review.rating}/5</span>
+                </div>
+                <div style="margin-bottom: 1.5rem;">${tags}</div>
+                <p style="line-height: 1.8; margin-bottom: 1.5rem; font-size: 1.1rem;">${review.review}</p>
+                <p style="color: #4ecdc4; font-style: italic;">Reviewed by ${review.reviewer}</p>
+            `;
+            
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('reviewModal');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        window.addEventListener('click', function(e) {
+            const modal = document.getElementById('reviewModal');
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+
+        // Create floating particles
+        function createFloatingParticles() {
+            const hero = document.querySelector('.hero');
+            
+            for (let i = 0; i < 10; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.width = Math.random() * 4 + 2 + 'px';
+                particle.style.height = particle.style.width;
+                particle.style.animationDelay = Math.random() * 6 + 's';
+                particle.style.animationDuration = (Math.random() * 3 + 4) + 's';
+                hero.appendChild(particle);
+            }
+        }
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
